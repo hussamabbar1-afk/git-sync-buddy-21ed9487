@@ -54,8 +54,6 @@ const mobileNavigation = [
   byPath("/termine"),
 ] as const;
 
-
-
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
@@ -72,7 +70,6 @@ export function AppShell({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
     navigate({ to: "/login", replace: true });
   }
-
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -133,14 +130,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Button variant="ghost" size="icon" aria-label="Abmelden" onClick={handleSignOut}>
               <LogOut className="size-4" />
             </Button>
-
           </div>
         </header>
 
         <main className="flex-1 px-4 py-6 lg:px-8 lg:py-8">{children}</main>
 
         <nav className="sticky bottom-0 flex border-t bg-card lg:hidden">
-          {navigation.slice(0, 5).map((item) => (
+          {mobileNavigation.map((item) => (
             <Link
               key={item.to}
               to={item.to}

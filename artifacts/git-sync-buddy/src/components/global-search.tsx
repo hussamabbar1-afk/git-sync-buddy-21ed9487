@@ -22,6 +22,7 @@ const supportedRoutes = [
   "/ki-mitarbeiter",
   "/konversationen",
   "/leads",
+  "/kunden",
   "/termine",
   "/einstellungen",
   "/einrichtung",
@@ -216,4 +217,3 @@ export function GlobalSearch() {
     </div>
   );
 }
-

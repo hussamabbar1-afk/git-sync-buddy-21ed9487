@@ -146,13 +146,60 @@ export function centsToEuroInput(cents: number | null | undefined) {
 export function euroInputToCents(input: string): { cents: number | null } | { error: string } {
   const raw = input.trim();
   if (!raw) return { cents: null };
-  const normalized = raw.replace(/\./g, "").replace(",", ".").replace(/[€\s]/g, "");
-  const parsed = Number(normalized);
-  if (!Number.isFinite(parsed)) {
+
+  const normalized = raw.replace(/[€\s]/g, "");
+  if (!normalized || !/^\d[\d.,]*$/.test(normalized)) {
     return { error: "Bitte einen gültigen Betrag in Euro eingeben." };
   }
-  if (parsed < 0) {
-    return { error: "Der geschätzte Wert darf nicht negativ sein." };
+
+  let integerPart: string;
+  let fractionPart = "";
+
+  const separatorCount = (normalized.match(/[.,]/g) ?? []).length;
+  const lastDot = normalized.lastIndexOf(".");
+  const lastComma = normalized.lastIndexOf(",");
+
+  if (lastDot !== -1 && lastComma !== -1) {
+    const decimalSeparator = lastDot > lastComma ? "." : ",";
+    const thousandsSeparator = decimalSeparator === "." ? "," : ".";
+    const decimalIndex = normalized.lastIndexOf(decimalSeparator);
+    const integerWithGrouping = normalized.slice(0, decimalIndex);
+    fractionPart = normalized.slice(decimalIndex + 1);
+    const groupedIntegerPattern =
+      thousandsSeparator === "." ? /^\d{1,3}(?:\.\d{3})*$/ : /^\d{1,3}(?:,\d{3})*$/;
+
+    if (
+      !groupedIntegerPattern.test(integerWithGrouping) ||
+      !/^\d{1,2}$/.test(fractionPart) ||
+      normalized.slice(decimalIndex + 1).includes(thousandsSeparator)
+    ) {
+      return {
+        error: "Bitte einen eindeutigen Betrag mit höchstens zwei Nachkommastellen eingeben.",
+      };
+    }
+    integerPart = integerWithGrouping.replaceAll(thousandsSeparator, "");
+  } else if (separatorCount === 1) {
+    const separator = lastDot !== -1 ? "." : ",";
+    const separatorIndex = normalized.indexOf(separator);
+    const left = normalized.slice(0, separatorIndex);
+    const right = normalized.slice(separatorIndex + 1);
+
+    if (!/^\d+$/.test(left) || !/^\d{1,2}$/.test(right)) {
+      return {
+        error: "Bitte einen eindeutigen Betrag mit höchstens zwei Nachkommastellen eingeben.",
+      };
+    }
+    integerPart = left;
+    fractionPart = right;
+  } else if (separatorCount === 0) {
+    integerPart = normalized;
+  } else {
+    return { error: "Bitte einen gültigen Betrag in Euro eingeben." };
+  }
+
+  const parsed = Number(`${integerPart}.${fractionPart.padEnd(2, "0") || "00"}`);
+  if (!Number.isSafeInteger(Math.round(parsed * 100))) {
+    return { error: "Der Betrag ist zu groß." };
   }
   return { cents: Math.round(parsed * 100) };
 }

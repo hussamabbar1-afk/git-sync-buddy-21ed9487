@@ -105,7 +105,7 @@ function parse(payload: unknown): Customer360 {
     const row = asRecord(entry);
     return {
       key: itemKey(row, index, "appointment"),
-      title: str(row["service_name"]) ?? "Termin",
+      title: str(row["service_type"]) ?? "Termin",
       subtitle: str(row["notes"]),
       meta: `${formatDate(str(row["appointment_date"]))} ${str(row["start_time"]) ?? ""} · ${
         str(row["status"]) ?? "—"
@@ -159,9 +159,9 @@ function parse(payload: unknown): Customer360 {
     const row = asRecord(entry);
     return {
       key: itemKey(row, index, "asset"),
-      title: str(row["name"]) ?? str(row["asset_type"]) ?? "Anlage",
+      title: str(row["name"]) ?? str(row["category"]) ?? "Anlage",
       subtitle: [str(row["manufacturer"]), str(row["model"])].filter(Boolean).join(" ") || null,
-      meta: `Installiert: ${formatDate(str(row["installed_at"]))}`,
+      meta: `Installiert: ${formatDate(str(row["installed_on"]))}`,
     } satisfies ListItem;
   });
 
@@ -181,8 +181,8 @@ function parse(payload: unknown): Customer360 {
       const row = asRecord(entry);
       return {
         key: itemKey(row, index, "activity"),
-        title: str(row["action"]) ?? "Aktivität",
-        subtitle: str(row["entity_type"]),
+        title: str(row["title"]) ?? "Aktivität",
+        subtitle: str(row["event_type"]),
         meta: formatDateTime(str(row["created_at"])),
       } satisfies ListItem;
     });
