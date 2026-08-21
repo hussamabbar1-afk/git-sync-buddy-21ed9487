@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Git Sync Buddy"
+description = "A synced workspace for the Git Sync Buddy application imported from its GitHub main branch, preserving the source app structure and frontend behavior."
+version = "1.0.0"
+id = "artifacts/git-sync-buddy"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 19055
+
+[services.development]
+run = "pnpm --filter @workspace/git-sync-buddy run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/git-sync-buddy", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/git-sync-buddy/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "19055"
+BASE_PATH = "/"
